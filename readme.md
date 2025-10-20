@@ -24,7 +24,7 @@ Grading
 ## Team Info
 | Student Number | Student Name | Student Email |
 |-|-|-|
-|(STUDENT NUMBER HERE)| (STUDENT NAME HERE)| (STUDENT EMAIL HERE) |
+|802-19-0696| (STUDENT NAME HERE)| (STUDENT EMAIL HERE) |
 |802-23-7855| Abdel Medero Mattei| abdel.medero@upr.edu |
 
 ---
