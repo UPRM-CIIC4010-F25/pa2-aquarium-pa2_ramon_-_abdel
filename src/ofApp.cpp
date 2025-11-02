@@ -47,6 +47,13 @@ void ofApp::setup(){
     gameOverTitle.setLineHeight(34.0f);
     gameOverTitle.setLetterSpacing(1.035);
 
+    if(!backgroundmusic.load("Super Mario Bros - Swimming.mp3")){
+        ofLogError()<< "Failed to load backgroundmusic";
+    } else{
+        backgroundmusic.setLoop(true);
+        backgroundmusic.play();
+    }
+
 
     gameManager->AddScene(std::make_shared<GameOverScene>(
         GameSceneKindToString(GameSceneKind::GAME_OVER),
