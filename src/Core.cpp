@@ -29,14 +29,14 @@ void Creature::bounce() {
     if(m_y < 0){
         m_y = 0;
         if(m_speed != 5){
-            m_dx *= -1;
+            m_dy *= -1;
         }
     }
 
     if(m_y > m_height){
         m_y = m_height;
         if(m_speed != 5){
-            m_dx *= -1;
+            m_dy *= -1;
         }
     }
 }

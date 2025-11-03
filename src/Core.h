@@ -22,7 +22,7 @@ private:
 	int m_counter;
 };
 
-class GameSprite {
+class GameSprite {  
 public:
     GameSprite(const std::string& imagePath, int width, int height) {
         if (!m_image.load(imagePath)) {
@@ -32,6 +32,15 @@ public:
         m_flippedImage = m_image;
         m_flippedImage.mirror(false, true); // Mirror horizontally
     }
+
+        void resize(int width, int height) {
+        m_image.resize(width, height);
+        m_flippedImage = m_image;
+        m_flippedImage.mirror(false, true);
+    }
+
+int getWidth() const { return m_image.getWidth(); }
+int getHeight() const { return m_image.getHeight(); }
 
     void draw(float x, float y) const {
         if (m_flipped) {

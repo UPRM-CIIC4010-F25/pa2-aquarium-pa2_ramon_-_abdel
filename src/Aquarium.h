@@ -6,12 +6,14 @@
 #include <algorithm>
 #include "Core.h"
 
+class PowerUp; 
 
 enum class AquariumCreatureType {
     NPCreature,
     BiggerFish,
     FunnyFish,
     InflatedFish
+    PowerUp
 };
 
 string AquariumCreatureTypeToString(AquariumCreatureType t);
@@ -60,6 +62,8 @@ public:
     float isYDirectionActive() {return m_dy != 0; }
     float getDx() { return m_dx; }
     float getDy() { return m_dy; }
+    std::pair<int,int> getSpriteSize() const;
+    void setSpriteSize(int w, int h);
 
     int getScore()const { return m_score; }
     int getLives() const { return m_lives; }
@@ -123,6 +127,7 @@ class AquariumSpriteManager {
         std::shared_ptr<GameSprite> m_big_fish;
         std::shared_ptr<GameSprite> m_funny_fish;
         std::shared_ptr<GameSprite> m_inflated_fish;
+        std::shared_ptr<GameSprite> m_powerup_sprite;
 };
 
 
@@ -135,6 +140,7 @@ public:
     void clearCreatures();
     void update();
     void draw() const;
+    void spawnPowerUp();
     void setBounds(int w, int h) { m_width = w; m_height = h; }
     void setMaxPopulation(int n) { m_maxPopulation = n; }
     void Repopulate();
@@ -144,7 +150,10 @@ public:
     int getCreatureCount() const { return m_creatures.size(); }
     int getWidth() const { return m_width; }
     int getHeight() const { return m_height; }
-
+    std::shared_ptr<PowerUp> m_powerUp; // current power-up
+    int m_powerUpTimer = 0;             // countdown for power-up duration
+    std::shared_ptr<PlayerCreature> m_player;
+    void SetPlayer(std::shared_ptr<PlayerCreature> player) { m_player = std::move(player); }
 
 private:
     int m_maxPopulation = 0;
@@ -155,6 +164,12 @@ private:
     std::vector<std::shared_ptr<Creature>> m_next_creatures;
     std::vector<std::shared_ptr<AquariumLevel>> m_aquariumlevels;
     std::shared_ptr<AquariumSpriteManager> m_sprite_manager;
+    bool m_powerActive = false;
+    int m_savedPlayerSpeed = 0;
+    float m_savedPlayerRadius = 0.0f;
+    int m_savedSpriteW = 0;
+    int m_savedSpriteH = 0;
+    int m_powerUpCooldown = 0;
 };
 
 

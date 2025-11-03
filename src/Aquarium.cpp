@@ -1,5 +1,6 @@
 #include "Aquarium.h"
 #include <cstdlib>
+#include <ctime>
 
 
 string AquariumCreatureTypeToString(AquariumCreatureType t){
@@ -39,6 +40,19 @@ void PlayerCreature::reduceDamageDebounce() {
 void PlayerCreature::update() {
     this->reduceDamageDebounce();
     this->move();
+}
+
+std::pair<int,int> PlayerCreature::getSpriteSize() const {
+    if (m_sprite) {
+        return { m_sprite->getWidth(), m_sprite->getHeight() };
+    }
+    return {0, 0};
+}
+
+void PlayerCreature::setSpriteSize(int w, int h) {
+    if (m_sprite) {
+        m_sprite->resize(w, h);
+    }
 }
 
 
@@ -210,6 +224,7 @@ AquariumSpriteManager::AquariumSpriteManager(){
     this->m_big_fish = std::make_shared<GameSprite>("bigger-fish.png", 120, 120);
     this->m_funny_fish = std::make_shared<GameSprite>("Funny-Fish.png", 90, 90);
     this->m_inflated_fish = std::make_shared<GameSprite>("Inflated-fish.png", 120, 120);
+    this->m_powerup_sprite = std::make_shared<GameSprite>("power-up.png", 50, 50);
 }
 
 std::shared_ptr<GameSprite> AquariumSpriteManager::GetSprite(AquariumCreatureType t){
@@ -226,6 +241,9 @@ std::shared_ptr<GameSprite> AquariumSpriteManager::GetSprite(AquariumCreatureTyp
         case AquariumCreatureType::InflatedFish:
             return std::make_shared<GameSprite>(*this->m_inflated_fish);
         
+        case AquariumCreatureType::PowerUp: 
+            return m_powerup_sprite;
+
         default:
             return nullptr;
     }
@@ -236,9 +254,46 @@ std::shared_ptr<GameSprite> AquariumSpriteManager::GetSprite(AquariumCreatureTyp
 Aquarium::Aquarium(int width, int height, std::shared_ptr<AquariumSpriteManager> spriteManager)
     : m_width(width), m_height(height) {
         m_sprite_manager =  spriteManager;
+        srand(static_cast<unsigned>(time(nullptr)));
+    }
+//--------------------------------POWERUP CLASS--------------------------------------
+class PowerUp : public Creature {
+public:
+    PowerUp(float x, float y, int speed, std::shared_ptr<GameSprite> sprite)
+        : Creature(x, y, speed, 20.0f, 0, sprite) {}
+
+    void move() override {
+        m_x += m_dx * m_speed;
+        m_y += m_dy * m_speed;
+        bounce();
     }
 
+    void draw() const override {
+        if (m_sprite) {
+            m_sprite->draw(m_x, m_y);
+        }
+    }
+};
+//--------------------------------POWERUP SPAWN CLASS--------------------------------
+void Aquarium::spawnPowerUp() {
+   if (m_powerUp != nullptr) return; //only one powerup at a time
 
+    float chance = static_cast<float>(rand()) / RAND_MAX;
+    if (chance > 0.35f) return; //spawn chance
+
+    //spawn at random location
+    float x = static_cast<float>(rand() % m_width);
+    float y = static_cast<float>(rand() % m_height);
+
+    //create the PowerUp
+    m_powerUp = std::make_shared<PowerUp>(
+        x, y, 0,
+        m_sprite_manager->GetSprite(AquariumCreatureType::PowerUp)
+    );
+
+    //add to creatures
+    m_creatures.push_back(std::static_pointer_cast<Creature>(m_powerUp));
+}
 
 void Aquarium::addCreature(std::shared_ptr<Creature> creature) {
     creature->setBounds(m_width - 20, m_height - 20);
@@ -246,7 +301,7 @@ void Aquarium::addCreature(std::shared_ptr<Creature> creature) {
 }
 
 void Aquarium::addAquariumLevel(std::shared_ptr<AquariumLevel> level){
-    if(level == nullptr){return;} // guard to not add noise
+    if(level == nullptr){return;}
     this->m_aquariumlevels.push_back(level);
 }
 
@@ -255,6 +310,77 @@ void Aquarium::update() {
         creature->move();
     }
     this->Repopulate();
+
+     //spawn powerup with whatever % chance
+     if (m_powerUpCooldown > 0) {
+        --m_powerUpCooldown;
+    }
+
+    //collision check
+    if (m_player && m_powerUp && checkCollision(m_player, m_powerUp)) {
+        if (!m_powerActive) {
+            //original stats
+            m_savedPlayerSpeed  = m_player->getSpeed();
+            m_savedPlayerRadius = m_player->getCollisionRadius();
+            auto sz = m_player->getSpriteSize();
+            m_savedSpriteW = sz.first;
+            m_savedSpriteH = sz.second;
+
+            //buff
+            int newSpeed = static_cast<int>(std::ceil(m_savedPlayerSpeed * 2.0f));
+            m_player->changeSpeed(newSpeed);
+            m_player->setCollisionRadius(m_savedPlayerRadius * 1.5f);
+            if (m_savedSpriteW > 0 && m_savedSpriteH > 0) {
+                m_player->setSpriteSize(
+                    static_cast<int>(std::ceil(m_savedSpriteW * 1.5f)),
+                    static_cast<int>(std::ceil(m_savedSpriteH * 1.5f))
+                );
+            }
+
+            m_powerActive = true;
+            m_powerUpTimer = 5 * 60; // 5 seconds
+            ofLogNotice() << "Power-up applied"<< std::endl;
+        }
+
+        //cooldown so powerup doesn't keep respawning
+        removeCreature(std::static_pointer_cast<Creature>(m_powerUp));
+        m_powerUp = nullptr;
+        m_powerUpCooldown = 10 * 60; //10 seconds
+    }
+
+    //power up duration
+    if (m_powerActive) {
+        if (m_powerUpTimer > 0) {
+            --m_powerUpTimer;
+        } else {
+            //revert stats
+            m_player->changeSpeed(m_savedPlayerSpeed);
+            m_player->setCollisionRadius(m_savedPlayerRadius);
+            if (m_savedSpriteW > 0 && m_savedSpriteH > 0) {
+                m_player->setSpriteSize(m_savedSpriteW, m_savedSpriteH);
+            }
+            m_powerActive = false;
+            ofLogNotice() << "Power-up expired" << std::endl;
+        }
+    }
+
+    if (!m_powerUp && m_powerUpCooldown == 0) {
+        float chance = static_cast<float>(rand()) / RAND_MAX;
+        if (chance <= 0.35f) { //35% to spawn
+            float x = static_cast<float>(rand()) / RAND_MAX * (m_width  - 100);
+            float y = static_cast<float>(rand()) / RAND_MAX * (m_height - 100);
+
+            m_powerUp = std::make_shared<PowerUp>(
+                x, y, 0,
+                m_sprite_manager->GetSprite(AquariumCreatureType::PowerUp)
+            );
+            m_powerUp->setBounds(m_width - 20, m_height - 20);
+            m_creatures.push_back(std::static_pointer_cast<Creature>(m_powerUp));
+
+        }
+    }
+
+
 }
 
 void Aquarium::draw() const {
@@ -366,6 +492,8 @@ void AquariumGameScene::Update(){
 
     this->m_player->update();
 
+    this->m_aquarium->update();
+
     if (this->updateControl.tick()) {
         event = DetectAquariumCollisions(this->m_aquarium, this->m_player);
         if (event != nullptr && event->isCollisionEvent()) {
@@ -396,7 +524,7 @@ void AquariumGameScene::Update(){
                 ofLogError() << "Error: creatureB is null in collision event." << std::endl;
             }
         }
-        this->m_aquarium->update();
+        
     }
 
 }
