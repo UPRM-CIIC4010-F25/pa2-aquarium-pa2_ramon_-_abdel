@@ -303,6 +303,9 @@ void Aquarium::SpawnCreature(AquariumCreatureType type) {
         case AquariumCreatureType::FunnyFish:
             this->addCreature(std::make_shared<FunnyFish>(x, y, speed, this->m_sprite_manager->GetSprite(AquariumCreatureType::FunnyFish)));
             break;
+         case AquariumCreatureType::InflatedFish:
+            this->addCreature(std::make_shared<InflatedFish>(x, y, speed, this->m_sprite_manager->GetSprite(AquariumCreatureType::InflatedFish)));
+            break;
         default:
             ofLogError() << "Unknown creature type to spawn!";
             break;
