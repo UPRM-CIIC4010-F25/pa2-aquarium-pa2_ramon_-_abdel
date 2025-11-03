@@ -175,7 +175,7 @@ InflatedFish::InflatedFish(float x, float y, int speed, std::shared_ptr<GameSpri
     normalize();
 
     setCollisionRadius(80);
-    m_value = 10;
+    m_value = 4;
     m_creatureType = AquariumCreatureType::FunnyFish;
 }
 
