@@ -30,6 +30,7 @@ void ofApp::setup(){
     player = std::make_shared<PlayerCreature>(ofGetWindowWidth()/2 - 50, ofGetWindowHeight()/2 - 50, DEFAULT_SPEED, this->spriteManager->GetSprite(AquariumCreatureType::NPCreature));
     player->setDirection(0, 0); // Initially stationary
     player->setBounds(ofGetWindowWidth() - 20, ofGetWindowHeight() - 20);
+    myAquarium->SetPlayer(player);
 
 
     myAquarium->addAquariumLevel(std::make_shared<Level_0>(0, 10));
