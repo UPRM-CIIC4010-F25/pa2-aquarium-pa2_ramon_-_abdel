@@ -176,7 +176,7 @@ InflatedFish::InflatedFish(float x, float y, int speed, std::shared_ptr<GameSpri
 
     setCollisionRadius(80);
     m_value = 4;
-    m_creatureType = AquariumCreatureType::FunnyFish;
+    m_creatureType = AquariumCreatureType::InflatedFish;
 }
 
 void InflatedFish::move() {
@@ -209,7 +209,7 @@ AquariumSpriteManager::AquariumSpriteManager(){
     this->m_npc_fish = std::make_shared<GameSprite>("base-fish.png", 70,70);
     this->m_big_fish = std::make_shared<GameSprite>("bigger-fish.png", 120, 120);
     this->m_funny_fish = std::make_shared<GameSprite>("Funny-Fish.png", 90, 90);
-    this->m_inflated_fish = std::make_shared<GameSprite>("Inflated-fish.png", 150, 150);
+    this->m_inflated_fish = std::make_shared<GameSprite>("Inflated-fish.png", 120, 120);
 }
 
 std::shared_ptr<GameSprite> AquariumSpriteManager::GetSprite(AquariumCreatureType t){
