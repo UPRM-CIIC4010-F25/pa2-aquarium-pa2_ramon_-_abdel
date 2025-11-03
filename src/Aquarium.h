@@ -12,7 +12,7 @@ enum class AquariumCreatureType {
     NPCreature,
     BiggerFish,
     FunnyFish,
-    InflatedFish
+    InflatedFish,
     PowerUp
 };
 
