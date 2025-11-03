@@ -9,7 +9,9 @@
 
 enum class AquariumCreatureType {
     NPCreature,
-    BiggerFish
+    BiggerFish,
+    FunnyFish,
+    InflatedFish
 };
 
 string AquariumCreatureTypeToString(AquariumCreatureType t);
@@ -93,6 +95,23 @@ public:
     void draw() const override;
 };
 
+class FunnyFish : public NPCreature {
+    public:
+        FunnyFish(float x, float y, int speed, std::shared_ptr<GameSprite> sprite);
+        void move() override;
+        void draw() const override;
+
+    private:
+        void randomizeDirection();
+        int m_zigzagtimer;
+};
+
+class InflatedFish : public NPCreature {
+    public:
+        InflatedFish(float x, float y, int speed, std::shared_ptr<GameSprite> sprite);
+        void move() override;
+        void draw() const override;
+};
 
 class AquariumSpriteManager {
     public:
@@ -102,6 +121,8 @@ class AquariumSpriteManager {
     private:
         std::shared_ptr<GameSprite> m_npc_fish;
         std::shared_ptr<GameSprite> m_big_fish;
+        std::shared_ptr<GameSprite> m_funny_fish;
+        std::shared_ptr<GameSprite> m_inflated_fish;
 };
 
 
