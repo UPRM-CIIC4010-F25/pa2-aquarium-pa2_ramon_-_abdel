@@ -209,7 +209,7 @@ AquariumSpriteManager::AquariumSpriteManager(){
     this->m_npc_fish = std::make_shared<GameSprite>("base-fish.png", 70,70);
     this->m_big_fish = std::make_shared<GameSprite>("bigger-fish.png", 120, 120);
     this->m_funny_fish = std::make_shared<GameSprite>("Funny-Fish.png", 90, 90);
-    this->m_inflated_fish = std::make_shared<GameSprite>("Inflated-fish.png", 60, 60);
+    this->m_inflated_fish = std::make_shared<GameSprite>("Inflated-fish.png", 150, 150);
 }
 
 std::shared_ptr<GameSprite> AquariumSpriteManager::GetSprite(AquariumCreatureType t){
@@ -478,6 +478,34 @@ std::vector<AquariumCreatureType> Level_1::Repopulate() {
 }
 
 std::vector<AquariumCreatureType> Level_2::Repopulate() {
+    std::vector<AquariumCreatureType> toRepopulate;
+    for(std::shared_ptr<AquariumLevelPopulationNode> node : this->m_levelPopulation){
+        int delta = node->population - node->currentPopulation;
+        if(delta >0){
+            for(int i=0; i<delta; i++){
+                toRepopulate.push_back(node->creatureType);
+            }
+            node->currentPopulation += delta;
+        }
+    }
+    return toRepopulate;
+}
+
+std::vector<AquariumCreatureType> Level_3::Repopulate() {
+    std::vector<AquariumCreatureType> toRepopulate;
+    for(std::shared_ptr<AquariumLevelPopulationNode> node : this->m_levelPopulation){
+        int delta = node->population - node->currentPopulation;
+        if(delta >0){
+            for(int i=0; i<delta; i++){
+                toRepopulate.push_back(node->creatureType);
+            }
+            node->currentPopulation += delta;
+        }
+    }
+    return toRepopulate;
+}
+
+std::vector<AquariumCreatureType> Level_4::Repopulate() {
     std::vector<AquariumCreatureType> toRepopulate;
     for(std::shared_ptr<AquariumLevelPopulationNode> node : this->m_levelPopulation){
         int delta = node->population - node->currentPopulation;
